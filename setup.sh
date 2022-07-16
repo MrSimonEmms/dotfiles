@@ -27,6 +27,23 @@ function ohmyzsh() {
   echo "Installing Oh My ZSH!"
 
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+
+  PID_FILE="${HOME}/.oh-my-zsh/store.pid"
+
+  # Kill the old PID if it's running
+  OLD_PID=$(cat "${PID_FILE}" || true)
+  if [ "${OLD_PID}" != "" ]; then
+    echo "Killing PID: ${OLD_PID}"
+    kill $(cat "${PID_FILE}") || true
+  fi
+
+  # Start backup process
+  bash ./ohmyzsh_backup.sh &
+
+  # Get the PID and store it so we can run this again
+  PID=$!
+  echo "Backup PID: ${PID}"
+  echo "${PID}" > "${PID_FILE}"
 }
 
 kubeconfig
